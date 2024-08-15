@@ -4,7 +4,7 @@
 
 ## Overview
 
-This project aims to develop a decentralized on-chain betting application using CosmWasm smart contracts written in Rust, deployed on the Oraichain network. The application will allow users to place bets on various events in a secure, transparent, and decentralized manner.
+**WagerWave** is a decentralized on-chain betting application designed for the oraichain. Utilizing CosmWasm smart contracts written in Rust and deployed on the Oraichain network, WagerWave ensures a secure, transparent, and decentralized platform for users to place bets on a variety of events.
 
 ## Project Description
 
