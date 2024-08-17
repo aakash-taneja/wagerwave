@@ -1,5 +1,6 @@
 use crate::error::ContractError;
 use crate::state::{Bet, BettingEvent, User, BETS, EVENTS, STATE, USERS};
+use cosmwasm_std::Decimal;
 #[cfg(not(feature = "library"))]
 use cosmwasm_std::{DepsMut, MessageInfo, Response};
 
@@ -18,6 +19,7 @@ pub fn try_create_event(
     description: String,
     options: Vec<String>,
     end_time: u64,
+    odds: Vec<Decimal>,
 ) -> Result<Response, ContractError> {
     let state = STATE.load(deps.storage)?;
     let event = BettingEvent {
@@ -28,6 +30,7 @@ pub fn try_create_event(
         end_time,
         resolved: false,
         winning_option: None,
+        odds,
     };
     EVENTS.save(deps.storage, state.event_count, &event)?;
     STATE.update(deps.storage, |mut state| -> Result<_, ContractError> {
@@ -74,4 +77,18 @@ pub fn try_resolve_event(
     event.resolved = true;
     EVENTS.save(deps.storage, event_id, &event)?;
     Ok(Response::new().add_attribute("method", "resolve_event"))
+}
+pub fn try_update_odds(
+    deps: DepsMut,
+    info: MessageInfo,
+    event_id: u64,
+    new_odds: Vec<Decimal>,
+) -> Result<Response, ContractError> {
+    let mut event = EVENTS.load(deps.storage, event_id)?;
+    if event.creator != info.sender {
+        return Err(ContractError::Unauthorized {});
+    }
+    event.odds = new_odds;
+    EVENTS.save(deps.storage, event_id, &event)?;
+    Ok(Response::new().add_attribute("method", "update_odds"))
 }

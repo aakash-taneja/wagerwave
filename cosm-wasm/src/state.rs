@@ -1,4 +1,4 @@
-use cosmwasm_std::{Addr, Coin};
+use cosmwasm_std::{Addr, Coin, Decimal};
 use cw_storage_plus::{Item, Map};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -20,6 +20,7 @@ pub struct BettingEvent {
     pub end_time: u64,
     pub resolved: bool,
     pub winning_option: Option<String>,
+    pub odds: Vec<Decimal>,
 }
 
 // Define the state for a placed bet

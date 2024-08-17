@@ -1,5 +1,7 @@
 use crate::error::ContractError;
-use crate::execute::{try_create_event, try_place_bet, try_register_user, try_resolve_event};
+use crate::execute::{
+    try_create_event, try_place_bet, try_register_user, try_resolve_event, try_update_odds,
+};
 use crate::msg::{ExecuteMsg, InstantiateMsg, QueryMsg};
 use crate::query::{query_bet, query_event, query_user};
 use crate::state::{State, STATE};
@@ -36,12 +38,16 @@ pub fn execute(
             description,
             options,
             end_time,
-        } => try_create_event(deps, info, description, options, end_time),
+            odds,
+        } => try_create_event(deps, info, description, options, end_time, odds),
         ExecuteMsg::PlaceBet { event_id, option } => try_place_bet(deps, info, event_id, option),
         ExecuteMsg::ResolveEvent {
             event_id,
             winning_option,
         } => try_resolve_event(deps, info, event_id, winning_option),
+        ExecuteMsg::UpdateOdds { event_id, new_odds } => {
+            try_update_odds(deps, info, event_id, new_odds)
+        }
     }
 }
 

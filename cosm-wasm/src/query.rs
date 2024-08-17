@@ -22,6 +22,7 @@ pub fn query_event(deps: Deps, event_id: u64) -> StdResult<EventResponse> {
         end_time: event.end_time,
         resolved: event.resolved,
         winning_option: event.winning_option,
+        odds: event.odds,
     })
 }
 

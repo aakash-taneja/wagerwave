@@ -1,5 +1,5 @@
 use cosmwasm_schema::QueryResponses;
-use cosmwasm_std::{Addr, Coin};
+use cosmwasm_std::{Addr, Coin, Decimal};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
@@ -17,6 +17,7 @@ pub enum ExecuteMsg {
         description: String,
         options: Vec<String>,
         end_time: u64,
+        odds: Vec<Decimal>,
     },
     PlaceBet {
         event_id: u64,
@@ -25,6 +26,10 @@ pub enum ExecuteMsg {
     ResolveEvent {
         event_id: u64,
         winning_option: String,
+    },
+    UpdateOdds {
+        event_id: u64,
+        new_odds: Vec<Decimal>,
     },
 }
 
@@ -55,6 +60,7 @@ pub struct EventResponse {
     pub end_time: u64,
     pub resolved: bool,
     pub winning_option: Option<String>,
+    pub odds: Vec<Decimal>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
