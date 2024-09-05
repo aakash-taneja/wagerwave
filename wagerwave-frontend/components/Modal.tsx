@@ -19,10 +19,13 @@ import Decimal from "decimal.js";
 import { useEffect, useState } from "react";
 
 const BetModal = ({ isOpen, onClose }: any) => {
+  const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [options, setOptions] = useState(["", ""]);
   const [endTime, setEndTime] = useState<number>(0);
   const [odds, setOdds] = useState(["", ""]);
+  const [categories, setCategories] = useState([""]);
+  const [subCategories, setSubCategories] = useState([""]);
 
   useEffect(() => {
     const defaultEndTime = Math.floor(Date.now() / 1000) + 3600;
@@ -36,21 +39,36 @@ const BetModal = ({ isOpen, onClose }: any) => {
     const decimalOdds = odds.map((odd) => new Decimal(odd));
     console.log(
       "Creating the bet...",
+      title,
       description,
       options,
       endTime,
-      decimalOdds
+      decimalOdds,
+      categories,
+      subCategories
     );
-    createBet(wallet, description, options, endTime, decimalOdds);
+    createBet(
+      wallet,
+      title,
+      description,
+      options,
+      endTime,
+      decimalOdds,
+      categories,
+      subCategories
+    );
     onClose();
   };
 
   const createBet = async (
     wallet: any,
+    title: string,
     description: string,
     options: string[],
     endTime: number,
-    odds: Decimal[]
+    odds: Decimal[],
+    categories: string[],
+    subCategories: string[]
   ) => {
     const anyWindow = window as any;
     if (!anyWindow.getOfflineSignerAuto) {
@@ -68,17 +86,20 @@ const BetModal = ({ isOpen, onClose }: any) => {
 
     const msg = {
       create_event: {
+        title,
         description,
         options,
         end_time: endTime,
         odds,
+        categories,
+        sub_categories: subCategories,
       },
     };
     const address = (await signer.getAccounts())[0].address;
     // console.log(address);
     const result = await client.execute(
       address,
-      "neutron1fgdqj7pwv5nr53rph8m6etyqltkh9lv6283hpqtdkw7xagl7nt0sypk959",
+      "neutron1gh09zucan3z7pcrltyjhkpxmwz9ns2x2prackmds9e4kd2v08uhqmh365j",
       msg,
       "auto"
     );
@@ -93,6 +114,10 @@ const BetModal = ({ isOpen, onClose }: any) => {
         <ModalCloseButton />
         <ModalBody>
           <FormControl>
+            <FormLabel>Title</FormLabel>
+            <Input value={title} onChange={(e) => setTitle(e.target.value)} />
+          </FormControl>
+          <FormControl mt={4}>
             <FormLabel>Description</FormLabel>
             <Input
               value={description}
@@ -137,6 +162,22 @@ const BetModal = ({ isOpen, onClose }: any) => {
               onChange={(e) => setOdds([odds[0], e.target.value])}
               placeholder="Odds for Option 2"
               mt={2}
+            />
+          </FormControl>
+          <FormControl mt={4}>
+            <FormLabel>Categories</FormLabel>
+            <Input
+              value={categories.join(", ")}
+              onChange={(e) => setCategories(e.target.value.split(", "))}
+              placeholder="e.g., Sports, Politics"
+            />
+          </FormControl>
+          <FormControl mt={4}>
+            <FormLabel>Sub-Categories</FormLabel>
+            <Input
+              value={subCategories.join(", ")}
+              onChange={(e) => setSubCategories(e.target.value.split(", "))}
+              placeholder="e.g., Cricket, Football"
             />
           </FormControl>
         </ModalBody>

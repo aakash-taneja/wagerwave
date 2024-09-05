@@ -1,8 +1,91 @@
 import { Box, Button, Flex, Input, Text } from "@chakra-ui/react";
+import { SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
+import { Coin, GasPrice, StdFee } from "@cosmjs/stargate";
+import { useChain } from "@cosmos-kit/react";
 import { useState } from "react";
 
 const NavRight = () => {
   const [amount, setAmount] = useState("");
+
+  const handlePlaceBet = async (
+    eventID: number,
+    selectedOption: string,
+    amount: any
+  ) => {
+    try {
+      const anyWindow = window as any;
+      if (!anyWindow.getOfflineSignerAuto) {
+        throw new Error("Keplr extension is not available");
+      }
+
+      const signer = await anyWindow.getOfflineSignerAuto("pion-1");
+
+      const client: any = await SigningCosmWasmClient.connectWithSigner(
+        "https://rpc-falcron.pion-1.ntrn.tech",
+        signer,
+        { gasPrice: GasPrice.fromString("0.0053untrn") }
+      );
+      const msg = {
+        place_bet: {
+          event_id: eventID,
+          option: selectedOption,
+        },
+      };
+      let fee: StdFee = {
+        amount: [{ amount: "5000", denom: "untrn" }],
+        gas: "1000000",
+      };
+      let send_amount: Coin = {
+        amount: amount,
+        denom: "untrn",
+      };
+
+      const address = (await signer.getAccounts())[0].address;
+      // console.log(address);
+      const result = await client.execute(
+        address,
+        "neutron1gh09zucan3z7pcrltyjhkpxmwz9ns2x2prackmds9e4kd2v08uhqmh365j",
+        msg,
+        fee,
+        "",
+        [send_amount]
+      );
+      console.log("Bet placed:", result);
+    } catch (error) {
+      console.error("Error placing bet:", error);
+    }
+  };
+
+  const handleResolveEvent = async (eventID: number, winningOption: string) => {
+    const anyWindow = window as any;
+    if (!anyWindow.getOfflineSignerAuto) {
+      throw new Error("Keplr extension is not available");
+    }
+
+    const signer = await anyWindow.getOfflineSignerAuto("pion-1");
+
+    const client: any = await SigningCosmWasmClient.connectWithSigner(
+      "https://rpc-falcron.pion-1.ntrn.tech",
+      signer,
+      { gasPrice: GasPrice.fromString("0.0053untrn") }
+    );
+    const msg = {
+      resolve_event: {
+        event_id: eventID,
+        winning_option: winningOption,
+      },
+    };
+    const address = (await signer.getAccounts())[0].address;
+    // console.log(address);
+    const result = await client.execute(
+      address,
+      "neutron1gh09zucan3z7pcrltyjhkpxmwz9ns2x2prackmds9e4kd2v08uhqmh365j",
+      msg,
+      "auto"
+    );
+
+    console.log("winner created:", result);
+  };
 
   return (
     <Box
@@ -35,9 +118,21 @@ const NavRight = () => {
         colorScheme="teal"
         size="lg"
         width="full"
-        // onClick={handleCreateBet}
+        onClick={() => {
+          handlePlaceBet(1, "India ", "1");
+        }}
       >
         Place bet
+      </Button>
+      <Button
+        colorScheme="teal"
+        size="lg"
+        width="full"
+        onClick={() => {
+          handleResolveEvent(1, "India ");
+        }}
+      >
+        Resolve Event
       </Button>
       {/* <MyBets /> */}
     </Box>

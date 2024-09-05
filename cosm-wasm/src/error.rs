@@ -32,4 +32,7 @@ pub enum ContractError {
 
     #[error("Event has not ended yet")]
     EventNotEnded {},
+
+    #[error("Invalid winning option")]
+    InvalidWinningOption {},
 }

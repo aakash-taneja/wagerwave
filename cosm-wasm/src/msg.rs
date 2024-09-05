@@ -14,10 +14,13 @@ pub struct InstantiateMsg {
 pub enum ExecuteMsg {
     RegisterUser {},
     CreateEvent {
+        title: String,
         description: String,
         options: Vec<String>,
         end_time: u64,
         odds: Vec<Decimal>,
+        categories: Vec<String>,
+        sub_categories: Vec<String>,
     },
     PlaceBet {
         event_id: u64,
@@ -42,6 +45,10 @@ pub enum QueryMsg {
     GetEvent { event_id: u64 },
     #[returns(BetResponse)]
     GetBet { event_id: u64, user: Addr },
+    #[returns(Vec<EventResponse>)]
+    GetAllEvents {},
+    #[returns(Vec<BetResponse>)]
+    GetAllBet { event_id: u64 },
 }
 
 // Define the response structures for queries
@@ -55,12 +62,15 @@ pub struct UserResponse {
 pub struct EventResponse {
     pub id: u64,
     pub creator: Addr,
+    pub title: String,
     pub description: String,
     pub options: Vec<String>,
     pub end_time: u64,
     pub resolved: bool,
     pub winning_option: Option<String>,
     pub odds: Vec<Decimal>,
+    pub categories: Vec<String>,
+    pub sub_categories: Vec<String>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]

@@ -23,9 +23,37 @@ const BodyComponent = () => {
         signer,
         { gasPrice: GasPrice.fromString("0.0053untrn") }
       );
-      const query = { get_event: { event_id: 0 } };
+      const query = { get_all_bets: {} };
       const result = await client.queryContractSmart(
-        "neutron1fgdqj7pwv5nr53rph8m6etyqltkh9lv6283hpqtdkw7xagl7nt0sypk959",
+        "neutron1gh09zucan3z7pcrltyjhkpxmwz9ns2x2prackmds9e4kd2v08uhqmh365j",
+        query
+      );
+      console.log(result);
+      // setBet(result);
+      // setError(null);
+    } catch (err) {
+      console.log(err);
+      // setError(err.message);
+      // setBet(null);
+    }
+  };
+  const fetchEvents = async () => {
+    try {
+      const anyWindow = window as any;
+      if (!anyWindow.getOfflineSignerAuto) {
+        throw new Error("Keplr extension is not available");
+      }
+
+      const signer = await anyWindow.getOfflineSignerAuto("pion-1");
+
+      const client: any = await SigningCosmWasmClient.connectWithSigner(
+        "https://rpc-falcron.pion-1.ntrn.tech",
+        signer,
+        { gasPrice: GasPrice.fromString("0.0053untrn") }
+      );
+      const query = { get_all_bets: {} };
+      const result = await client.queryContractSmart(
+        "neutron1gh09zucan3z7pcrltyjhkpxmwz9ns2x2prackmds9e4kd2v08uhqmh365j",
         query
       );
       console.log(result);
@@ -123,6 +151,7 @@ const BodyComponent = () => {
           <MatchCard key={index} match={match} />
         ))}
       </Flex>
+      <Button onClick={fetchBet}>Query Events</Button>
       <Button onClick={fetchBet}>Query bets</Button>
     </Box>
   );

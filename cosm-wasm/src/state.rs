@@ -15,12 +15,15 @@ pub struct User {
 pub struct BettingEvent {
     pub id: u64,
     pub creator: Addr,
+    pub title: String,
     pub description: String,
     pub options: Vec<String>,
     pub end_time: u64,
     pub resolved: bool,
     pub winning_option: Option<String>,
     pub odds: Vec<Decimal>,
+    pub categories: Vec<String>,
+    pub sub_categories: Vec<String>,
 }
 
 // Define the state for a placed bet
