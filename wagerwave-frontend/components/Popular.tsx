@@ -20,12 +20,11 @@ import { MdSportsSoccer } from "react-icons/md";
 
 const Popular = ({ onSelectCategory }: any) => {
   const categories = [
+    { name: "Cricket", icon: GiCricketBat },
     { name: "Soccer", icon: MdSportsSoccer },
     { name: "Premier League", icon: FaFutbol },
     { name: "Basketball", icon: FaBasketballBall },
-    { name: "Counter-Strike", icon: SiCounterstrike },
     { name: "Baseball", icon: FaBaseballBall },
-    { name: "Cricket", icon: GiCricketBat },
     { name: "Volleyball", icon: FaVolleyballBall },
   ];
 

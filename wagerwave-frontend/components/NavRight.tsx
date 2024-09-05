@@ -1,17 +1,54 @@
-import { Box, Button, Flex, Input, Text } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Flex,
+  Input,
+  Tag,
+  TagLabel,
+  Text,
+  Wrap,
+  WrapItem,
+} from "@chakra-ui/react";
 import { SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import { Coin, GasPrice, StdFee } from "@cosmjs/stargate";
 import { useChain } from "@cosmos-kit/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-const NavRight = () => {
+const NavRight = ({ match, option, onSelectOption }: any) => {
   const [amount, setAmount] = useState("");
+  const [isCreator, setIsCreator] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (match) {
+      setIsCreator(false);
+
+      const checkCreator = async () => {
+        const anyWindow = window as any;
+        if (!anyWindow.getOfflineSignerAuto) {
+          throw new Error("Keplr extension is not available");
+        }
+
+        const signer = await anyWindow.getOfflineSignerAuto("pion-1");
+        const address = (await signer.getAccounts())[0].address;
+        console.log("checking creator", address, match.creator, isCreator);
+        if (address === match.creator) {
+          setIsCreator(true);
+        }
+      };
+
+      checkCreator();
+    }
+  }, [match]);
 
   const handlePlaceBet = async (
     eventID: number,
     selectedOption: string,
     amount: any
   ) => {
+    if (!selectedOption || !amount) {
+      console.error("Please select a match, an option, and enter an amount.");
+      return;
+    }
     try {
       const anyWindow = window as any;
       if (!anyWindow.getOfflineSignerAuto) {
@@ -88,54 +125,73 @@ const NavRight = () => {
   };
 
   return (
-    <Box
-      bg="#181A24"
-      p={6}
-      borderRadius="md"
-      border={"1px solid white"}
-      color="white"
-      flex={1}
-      mt={4}
-      mr={4}
-    >
-      <Text fontSize="2xl" mb={4}>
-        Place your bet
-      </Text>
-      <Text mb={2}>Enter amount</Text>
-      <Input
-        placeholder="Enter amount"
-        value={amount}
-        onChange={(e) => setAmount(e.target.value)}
-        mb={4}
-      />
-      <Flex justifyContent="space-between" mb={4}>
-        <Button onClick={() => setAmount("100")}>$100</Button>
-        <Button onClick={() => setAmount("200")}>$200</Button>
-        <Button onClick={() => setAmount("500")}>$500</Button>
-        {/* <Button onClick={() => setAmount("650")}>$650</Button> */}
-      </Flex>
-      <Button
-        colorScheme="teal"
-        size="lg"
-        width="full"
-        onClick={() => {
-          handlePlaceBet(1, "India ", "1");
-        }}
+    match && (
+      <Box
+        bg="#181A24"
+        p={6}
+        borderRadius="md"
+        border={"1px solid white"}
+        color="white"
+        flex={1}
+        mt={4}
+        mr={4}
       >
-        Place bet
-      </Button>
-      <Button
-        colorScheme="teal"
-        size="lg"
-        width="full"
-        onClick={() => {
-          handleResolveEvent(1, "India ");
-        }}
-      >
-        Resolve Event
-      </Button>
-      {/* <MyBets /> */}
-    </Box>
+        <Text fontSize="2xl" mb={4}>
+          Place your bet
+        </Text>
+        <Text mb={2}>Enter amount</Text>
+        <Input
+          placeholder="Enter amount"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          mb={4}
+        />
+        <Flex justifyContent="space-between" mb={4}>
+          <Button onClick={() => setAmount("100")}>$100</Button>
+          <Button onClick={() => setAmount("200")}>$200</Button>
+          <Button onClick={() => setAmount("500")}>$500</Button>
+          {/* <Button onClick={() => setAmount("650")}>$650</Button> */}
+        </Flex>
+        <Flex justifyContent="space-between" mb={4}>
+          {match.options.map((optionsingle: any, index: any) => (
+            <Tag
+              key={index}
+              size="lg"
+              variant={optionsingle === option ? "solid" : "outline"}
+              colorScheme="teal"
+              cursor="pointer"
+              onClick={() => onSelectOption(optionsingle)}
+            >
+              <TagLabel>{optionsingle}</TagLabel>
+            </Tag>
+          ))}
+        </Flex>
+        <Button
+          colorScheme="teal"
+          size="lg"
+          width="full"
+          onClick={() => {
+            handlePlaceBet(match.id, option, amount);
+          }}
+        >
+          Place bet
+        </Button>
+        {isCreator && (
+          <Button
+            colorScheme="teal"
+            size="lg"
+            width="full"
+            mt={4}
+            onClick={() => {
+              handleResolveEvent(match.id, "india");
+            }}
+          >
+            Resolve Event
+          </Button>
+        )}
+        {/* <MyBets /> */}
+      </Box>
+    )
   );
 };
 export default NavRight;

@@ -1,8 +1,8 @@
-import { Box, Flex, Image, Text, Icon } from "@chakra-ui/react";
+import { Box, Flex, Image, Text, Icon, Heading } from "@chakra-ui/react";
 import { FaRegFutbol } from "react-icons/fa"; // Football icon
 import { MdOutlineSportsSoccer } from "react-icons/md"; // Soccer ball icon
 
-const MatchCard = ({ match }: any) => {
+const MatchCard = ({ match, onClick }: any) => {
   const borderColor = "gray.200"; // Example border color
   const primaryColor = "blue.600"; // Example primary color
   const secondaryColor = "red.500"; // Example secondary color
@@ -18,7 +18,12 @@ const MatchCard = ({ match }: any) => {
       color={"white"}
       borderColor={borderColor}
       w={"49%"}
+      onClick={onClick}
+      cursor="pointer"
     >
+      <Heading size={"md"} mb={4}>
+        {match.title}
+      </Heading>
       <Flex alignItems="center" justifyContent="space-between">
         <Image src={match.team1.logo} alt={match.team1.name} boxSize="50px" />
         <Text ml={4} fontSize="lg" fontWeight="bold" color={primaryColor}>

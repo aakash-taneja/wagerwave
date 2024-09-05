@@ -1,13 +1,69 @@
 import { Box, Button, Flex, Grid } from "@chakra-ui/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Popular from "./Popular";
 import GridItem from "./GridItem";
 import { SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import { GasPrice } from "@cosmjs/stargate";
 import MatchCard from "./MatchCard";
 
-const BodyComponent = () => {
-  const [selectedCategory, setSelectedCategory] = useState("Soccer");
+const BodyComponent = ({ onSelectMatch, onSelectOption }: any) => {
+  const [selectedCategory, setSelectedCategory] = useState("cricket");
+  const [matches, setMatches] = useState<any>({});
+
+  const fetchEvents = async () => {
+    try {
+      const anyWindow = window as any;
+      if (!anyWindow.getOfflineSignerAuto) {
+        throw new Error("Keplr extension is not available");
+      }
+
+      const signer = await anyWindow.getOfflineSignerAuto("pion-1");
+
+      const client: any = await SigningCosmWasmClient.connectWithSigner(
+        "https://rpc-falcron.pion-1.ntrn.tech",
+        signer,
+        { gasPrice: GasPrice.fromString("0.0053untrn") }
+      );
+      const query = { get_all_events: {} };
+      const result = await client.queryContractSmart(
+        "neutron1gh09zucan3z7pcrltyjhkpxmwz9ns2x2prackmds9e4kd2v08uhqmh365j",
+        query
+      );
+      console.log(result);
+      const transformedMatches = transformEventsToMatches(result);
+      setMatches(transformedMatches);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const handleMatchClick = async (match: any) => {
+    console.log("clicked");
+    try {
+      const anyWindow = window as any;
+      if (!anyWindow.getOfflineSignerAuto) {
+        throw new Error("Keplr extension is not available");
+      }
+
+      const signer = await anyWindow.getOfflineSignerAuto("pion-1");
+
+      const client: any = await SigningCosmWasmClient.connectWithSigner(
+        "https://rpc-falcron.pion-1.ntrn.tech",
+        signer,
+        { gasPrice: GasPrice.fromString("0.0053untrn") }
+      );
+      const query = { get_event: { event_id: match.id } };
+      const result = await client.queryContractSmart(
+        "neutron1gh09zucan3z7pcrltyjhkpxmwz9ns2x2prackmds9e4kd2v08uhqmh365j",
+        query
+      );
+      console.log(result);
+      onSelectMatch(result);
+      onSelectOption(null);
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   const fetchBet = async () => {
     try {
@@ -23,7 +79,7 @@ const BodyComponent = () => {
         signer,
         { gasPrice: GasPrice.fromString("0.0053untrn") }
       );
-      const query = { get_all_bets: {} };
+      const query = { get_all_bet: { event_id: 0 } };
       const result = await client.queryContractSmart(
         "neutron1gh09zucan3z7pcrltyjhkpxmwz9ns2x2prackmds9e4kd2v08uhqmh365j",
         query
@@ -37,86 +93,29 @@ const BodyComponent = () => {
       // setBet(null);
     }
   };
-  const fetchEvents = async () => {
-    try {
-      const anyWindow = window as any;
-      if (!anyWindow.getOfflineSignerAuto) {
-        throw new Error("Keplr extension is not available");
+
+  const transformEventsToMatches = (events: any) => {
+    const matches = events.reduce((acc: any, event: any) => {
+      console.log("event", event);
+      const category = event.sub_categories[0];
+      if (!acc[category]) {
+        acc[category] = [];
       }
-
-      const signer = await anyWindow.getOfflineSignerAuto("pion-1");
-
-      const client: any = await SigningCosmWasmClient.connectWithSigner(
-        "https://rpc-falcron.pion-1.ntrn.tech",
-        signer,
-        { gasPrice: GasPrice.fromString("0.0053untrn") }
-      );
-      const query = { get_all_bets: {} };
-      const result = await client.queryContractSmart(
-        "neutron1gh09zucan3z7pcrltyjhkpxmwz9ns2x2prackmds9e4kd2v08uhqmh365j",
-        query
-      );
-      console.log(result);
-      // setBet(result);
-      // setError(null);
-    } catch (err) {
-      console.log(err);
-      // setError(err.message);
-      // setBet(null);
-    }
+      acc[category].push({
+        id: event.id,
+        title: event.title,
+        team1: { name: event.options[0], logo: "team1.svg" }, // Adjust as needed
+        team2: { name: event.options[1], logo: "team2.svg" }, // Adjust as needed
+        odds: { team1: event.odds[0], team2: event.odds[1] }, // Adjust as needed
+      });
+      return acc;
+    }, {});
+    return matches;
   };
 
-  const matches: any = {
-    Soccer: [
-      {
-        team1: { name: "Team A", logo: "team1.svg" },
-        team2: { name: "Team B", logo: "team2.svg" },
-        odds: { team1: 1.5, team2: 2.5 },
-      },
-      {
-        team1: { name: "Team A", logo: "team3.svg" },
-        team2: { name: "Team B", logo: "team4.svg" },
-        odds: { team1: 1.5, team2: 2.5 },
-      },
-      {
-        team1: { name: "Team A", logo: "team5.svg" },
-        team2: { name: "Team B", logo: "team6.svg" },
-        odds: { team1: 1.5, team2: 2.5 },
-      },
-      {
-        team1: { name: "Team A", logo: "team1.svg" },
-        team2: { name: "Team B", logo: "team2.svg" },
-        odds: { team1: 1.5, team2: 2.5 },
-      },
-      {
-        team1: { name: "Team A", logo: "team3.svg" },
-        team2: { name: "Team B", logo: "team4.svg" },
-        odds: { team1: 1.5, team2: 2.5 },
-      },
-      {
-        team1: { name: "Team A", logo: "team5.svg" },
-        team2: { name: "Team B", logo: "team6.svg" },
-        odds: { team1: 1.5, team2: 2.5 },
-      },
-    ],
-    Basketball: [
-      {
-        team1: { name: "Team A", logo: "logoA.png" },
-        team2: { name: "Team B", logo: "logoB.png" },
-        odds: { team1: 1.5, team2: 2.5 },
-      },
-      // Add more matches here
-    ],
-    Cricket: [
-      {
-        team1: { name: "Team A", logo: "logoA.png" },
-        team2: { name: "Team B", logo: "logoB.png" },
-        odds: { team1: 1.5, team2: 2.5 },
-      },
-      // Add more matches here
-    ],
-    // Add more categories and matches here
-  };
+  useEffect(() => {
+    fetchEvents();
+  }, []);
 
   return (
     <Box p={4} bg={"#181A24"}>
@@ -147,11 +146,19 @@ const BodyComponent = () => {
 
       <Popular onSelectCategory={setSelectedCategory} />
       <Flex flexWrap={"wrap"} justifyContent={"space-between"}>
-        {matches[selectedCategory]?.map((match: any, index: any) => (
-          <MatchCard key={index} match={match} />
-        ))}
+        {matches[selectedCategory.toLocaleLowerCase()]?.map(
+          (match: any, index: any) => (
+            <MatchCard
+              key={index}
+              match={match}
+              onClick={() => {
+                handleMatchClick(match);
+              }}
+            />
+          )
+        )}
       </Flex>
-      <Button onClick={fetchBet}>Query Events</Button>
+      <Button onClick={fetchEvents}>Query Events</Button>
       <Button onClick={fetchBet}>Query bets</Button>
     </Box>
   );
