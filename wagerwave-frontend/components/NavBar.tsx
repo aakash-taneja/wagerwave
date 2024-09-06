@@ -12,13 +12,17 @@ import {
   FaVoteYea,
 } from "react-icons/fa";
 import BetModal from "./Modal";
+import { useRouter } from "next/router";
 
 const Navbar = () => {
   const [address, setAddress] = useState<string>("");
-  const [selectedLink, setSelectedLink] = useState<string>("Sports");
   const { connect, disconnect, isWalletConnected, wallet }: any =
     useChain("neutrontestnet");
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const router = useRouter();
+  const [selectedLink, setSelectedLink] = useState<string>(
+    router.pathname.substring(1) || "Sports"
+  );
 
   useEffect(() => {
     const fetchAddress = async () => {
@@ -38,13 +42,26 @@ const Navbar = () => {
       fetchAddress();
     }
   }, [isWalletConnected]);
+  useEffect(() => {
+    setSelectedLink(router.pathname.substring(1) || "Sports");
+  }, [router.pathname]);
 
   const links = [
-    { name: "Sports", icon: FaBasketballBall, color: "orange" },
-    { name: "Racing", icon: FaHorseHead, color: "brown" },
-    { name: "Lottery", icon: FaMoneyBillWave, color: "green" },
-    { name: "Politics", icon: FaVoteYea, color: "red" },
-    { name: "Crypto", icon: FaBitcoin, color: "yellow" },
+    {
+      name: "Sports",
+      icon: FaBasketballBall,
+      color: "orange",
+      path: "/sports",
+    },
+    { name: "Racing", icon: FaHorseHead, color: "brown", path: "/racing" },
+    {
+      name: "Business",
+      icon: FaMoneyBillWave,
+      color: "green",
+      path: "/business",
+    },
+    { name: "Politics", icon: FaVoteYea, color: "red", path: "/politics" },
+    { name: "Crypto", icon: FaBitcoin, color: "yellow", path: "/crypto" },
   ];
 
   return (
@@ -59,12 +76,14 @@ const Navbar = () => {
           {links.map((link) => (
             <Link
               key={link.name}
-              href="#"
+              href={link.path}
               px={4}
               py={2}
               rounded="md"
               _hover={{ textDecoration: "none", bg: "#2E3035" }}
-              color={selectedLink === link.name ? "white" : "gray"}
+              color={
+                selectedLink === link.name.toLowerCase() ? "white" : "gray"
+              }
               display="flex"
               alignItems="center"
               justifyContent="center"
@@ -73,7 +92,9 @@ const Navbar = () => {
               onClick={() => setSelectedLink(link.name)}
             >
               <link.icon
-                color={selectedLink === link.name ? link.color : "gray"}
+                color={
+                  selectedLink === link.name.toLowerCase() ? link.color : "gray"
+                }
                 style={{ marginRight: "8px" }}
               />
               {link.name}

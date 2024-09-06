@@ -5,10 +5,13 @@ import GridItem from "./GridItem";
 import { SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import { GasPrice } from "@cosmjs/stargate";
 import MatchCard from "./MatchCard";
+import { useRouter } from "next/router";
 
 const BodyComponent = ({ onSelectMatch, onSelectOption }: any) => {
+  const [selectedSubCategory, setSelectedSubCategory] = useState("cricket");
   const [selectedCategory, setSelectedCategory] = useState("cricket");
   const [matches, setMatches] = useState<any>({});
+  const router = useRouter();
 
   const fetchEvents = async () => {
     try {
@@ -29,8 +32,12 @@ const BodyComponent = ({ onSelectMatch, onSelectOption }: any) => {
         "neutron1gh09zucan3z7pcrltyjhkpxmwz9ns2x2prackmds9e4kd2v08uhqmh365j",
         query
       );
-      console.log(result);
-      const transformedMatches = transformEventsToMatches(result);
+      // console.log(result);
+      const transformedMatches = transformEventsToMatches(
+        result,
+        selectedCategory
+      );
+      console.log(transformedMatches);
       setMatches(transformedMatches);
     } catch (err) {
       console.log(err);
@@ -94,28 +101,34 @@ const BodyComponent = ({ onSelectMatch, onSelectOption }: any) => {
     }
   };
 
-  const transformEventsToMatches = (events: any) => {
-    const matches = events.reduce((acc: any, event: any) => {
-      console.log("event", event);
-      const category = event.sub_categories[0];
-      if (!acc[category]) {
-        acc[category] = [];
-      }
-      acc[category].push({
-        id: event.id,
-        title: event.title,
-        team1: { name: event.options[0], logo: "team1.svg" }, // Adjust as needed
-        team2: { name: event.options[1], logo: "team2.svg" }, // Adjust as needed
-        odds: { team1: event.odds[0], team2: event.odds[1] }, // Adjust as needed
-      });
-      return acc;
-    }, {});
-    return matches;
+  const transformEventsToMatches = (events: any, category: string) => {
+    return events
+      .filter(
+        (event: any) =>
+          event.categories[0].toLowerCase() === category.toLowerCase()
+      )
+      .reduce((acc: any, event: any) => {
+        console.log(event);
+        const subCategory = event.sub_categories[0].toLowerCase();
+        if (!acc[subCategory]) {
+          acc[subCategory] = [];
+        }
+        acc[subCategory].push({
+          id: event.id,
+          title: event.title,
+          team1: { name: event.options[0], logo: "team1.svg" }, // Adjust as needed
+          team2: { name: event.options[1], logo: "team2.svg" }, // Adjust as needed
+          odds: { team1: event.odds[0], team2: event.odds[1] }, // Adjust as needed
+        });
+        return acc;
+      }, {});
   };
 
   useEffect(() => {
+    const path = router.pathname.substring(1); // Remove leading slash
+    setSelectedCategory(path);
     fetchEvents();
-  }, []);
+  }, [router.pathname]);
 
   return (
     <Box p={4} bg={"#181A24"}>
@@ -144,9 +157,9 @@ const BodyComponent = ({ onSelectMatch, onSelectOption }: any) => {
         />
       </Grid>
 
-      <Popular onSelectCategory={setSelectedCategory} />
+      <Popular onSelectCategory={setSelectedSubCategory} />
       <Flex flexWrap={"wrap"} justifyContent={"space-between"}>
-        {matches[selectedCategory.toLocaleLowerCase()]?.map(
+        {matches[selectedSubCategory.toLocaleLowerCase()]?.map(
           (match: any, index: any) => (
             <MatchCard
               key={index}

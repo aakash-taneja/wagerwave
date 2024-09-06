@@ -7,7 +7,7 @@ import NavRight from "@/components/NavRight";
 import { Box } from "@chakra-ui/react";
 import { useState } from "react";
 
-export default function Home() {
+export default function Politics() {
   const [selectedMatch, setSelectedMatch] = useState(null);
   const [selectedOption, setSelectedOption] = useState(null);
 

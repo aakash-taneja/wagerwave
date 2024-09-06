@@ -17,6 +17,7 @@ import { useEffect, useState } from "react";
 const NavRight = ({ match, option, onSelectOption }: any) => {
   const [amount, setAmount] = useState("");
   const [isCreator, setIsCreator] = useState<boolean>(false);
+  const [bets, setBets] = useState<any[]>([]);
 
   useEffect(() => {
     if (match) {
@@ -37,6 +38,7 @@ const NavRight = ({ match, option, onSelectOption }: any) => {
       };
 
       checkCreator();
+      fetchBet();
     }
   }, [match]);
 
@@ -124,8 +126,105 @@ const NavRight = ({ match, option, onSelectOption }: any) => {
     console.log("winner created:", result);
   };
 
+  const fetchBet = async () => {
+    try {
+      const anyWindow = window as any;
+      if (!anyWindow.getOfflineSignerAuto) {
+        throw new Error("Keplr extension is not available");
+      }
+
+      const signer = await anyWindow.getOfflineSignerAuto("pion-1");
+
+      const client: any = await SigningCosmWasmClient.connectWithSigner(
+        "https://rpc-falcron.pion-1.ntrn.tech",
+        signer,
+        { gasPrice: GasPrice.fromString("0.0053untrn") }
+      );
+      const query = { get_all_bet: { event_id: match.id } };
+      const result = await client.queryContractSmart(
+        "neutron1gh09zucan3z7pcrltyjhkpxmwz9ns2x2prackmds9e4kd2v08uhqmh365j",
+        query
+      );
+      console.log(result);
+      setBets(result);
+      // setBet(result);
+      // setError(null);
+    } catch (err) {
+      console.log(err);
+      // setError(err.message);
+      // setBet(null);
+    }
+  };
+
   return (
-    match && (
+    <>
+      {match && (
+        <Box
+          bg="#181A24"
+          p={6}
+          borderRadius="md"
+          border={"1px solid white"}
+          color="white"
+          flex={1}
+          mt={4}
+          mr={4}
+        >
+          <Text fontSize="2xl" mb={4}>
+            Place your bet
+          </Text>
+          <Text mb={2}>Enter amount</Text>
+          <Input
+            placeholder="Enter amount"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            mb={4}
+          />
+          <Flex justifyContent="space-between" mb={4}>
+            <Button onClick={() => setAmount("100")}>$100</Button>
+            <Button onClick={() => setAmount("200")}>$200</Button>
+            <Button onClick={() => setAmount("500")}>$500</Button>
+            {/* <Button onClick={() => setAmount("650")}>$650</Button> */}
+          </Flex>
+          <Flex justifyContent="space-between" mb={4}>
+            {match.options.map((optionsingle: any, index: any) => (
+              <Tag
+                key={index}
+                size="lg"
+                variant={optionsingle === option ? "solid" : "outline"}
+                colorScheme="teal"
+                cursor="pointer"
+                onClick={() => onSelectOption(optionsingle)}
+              >
+                <TagLabel>{optionsingle}</TagLabel>
+              </Tag>
+            ))}
+          </Flex>
+          <Button
+            colorScheme="teal"
+            size="lg"
+            width="full"
+            onClick={() => {
+              handlePlaceBet(match.id, option, amount);
+            }}
+          >
+            Place bet
+          </Button>
+          {isCreator && (
+            <Button
+              colorScheme="teal"
+              size="lg"
+              width="full"
+              mt={4}
+              onClick={() => {
+                handleResolveEvent(match.id, "india");
+              }}
+            >
+              Resolve Event
+            </Button>
+          )}
+          {/* <MyBets /> */}
+        </Box>
+      )}
       <Box
         bg="#181A24"
         p={6}
@@ -137,61 +236,22 @@ const NavRight = ({ match, option, onSelectOption }: any) => {
         mr={4}
       >
         <Text fontSize="2xl" mb={4}>
-          Place your bet
+          All Bets
         </Text>
-        <Text mb={2}>Enter amount</Text>
-        <Input
-          placeholder="Enter amount"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          mb={4}
-        />
-        <Flex justifyContent="space-between" mb={4}>
-          <Button onClick={() => setAmount("100")}>$100</Button>
-          <Button onClick={() => setAmount("200")}>$200</Button>
-          <Button onClick={() => setAmount("500")}>$500</Button>
-          {/* <Button onClick={() => setAmount("650")}>$650</Button> */}
-        </Flex>
-        <Flex justifyContent="space-between" mb={4}>
-          {match.options.map((optionsingle: any, index: any) => (
-            <Tag
-              key={index}
-              size="lg"
-              variant={optionsingle === option ? "solid" : "outline"}
-              colorScheme="teal"
-              cursor="pointer"
-              onClick={() => onSelectOption(optionsingle)}
-            >
-              <TagLabel>{optionsingle}</TagLabel>
-            </Tag>
+        <Flex direction="column" gap={4}>
+          {bets.map((bet, index) => (
+            <Box key={index} p={4} bg="#2E3035" borderRadius="md">
+              <Text>Bet ID: {bet.event_id}</Text>
+              <Text>Amount: {bet.amount.amount}</Text>
+              <Text>
+                User: {bet.user.substring(0, 4)}...{bet.user.substring(42)}
+              </Text>
+              <Text>Option: {bet.option}</Text>
+            </Box>
           ))}
         </Flex>
-        <Button
-          colorScheme="teal"
-          size="lg"
-          width="full"
-          onClick={() => {
-            handlePlaceBet(match.id, option, amount);
-          }}
-        >
-          Place bet
-        </Button>
-        {isCreator && (
-          <Button
-            colorScheme="teal"
-            size="lg"
-            width="full"
-            mt={4}
-            onClick={() => {
-              handleResolveEvent(match.id, "india");
-            }}
-          >
-            Resolve Event
-          </Button>
-        )}
-        {/* <MyBets /> */}
       </Box>
-    )
+    </>
   );
 };
 export default NavRight;
