@@ -35,7 +35,7 @@ const Navbar = () => {
       const accounts = await signer.getAccounts();
       const add = accounts[0].address;
       setAddress(add);
-      console.log(add);
+      // console.log(add);
     };
 
     if (isWalletConnected) {

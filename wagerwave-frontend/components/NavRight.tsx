@@ -36,7 +36,7 @@ const NavRight = ({ match, option, onSelectOption }: any) => {
 
   useEffect(() => {
     if (match) {
-      console.log("match from navright", match);
+      // console.log("match from navright", match);
       setIsCreator(false);
 
       const checkCreator = async () => {
@@ -47,7 +47,7 @@ const NavRight = ({ match, option, onSelectOption }: any) => {
 
         const signer = await anyWindow.getOfflineSignerAuto("pion-1");
         const address = (await signer.getAccounts())[0].address;
-        console.log("checking creator", address, match.creator, isCreator);
+        // console.log("checking creator", address, match.creator, isCreator);
         if (address === match.creator) {
           setIsCreator(true);
         }
@@ -162,7 +162,7 @@ const NavRight = ({ match, option, onSelectOption }: any) => {
         "neutron1gh09zucan3z7pcrltyjhkpxmwz9ns2x2prackmds9e4kd2v08uhqmh365j",
         query
       );
-      console.log(result);
+      // console.log(result);
       setBets(result);
       // setBet(result);
       // setError(null);

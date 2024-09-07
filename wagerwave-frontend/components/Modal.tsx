@@ -37,16 +37,7 @@ const BetModal = ({ isOpen, onClose }: any) => {
 
   const handleCreateBet = () => {
     const decimalOdds = odds.map((odd) => new Decimal(odd));
-    console.log(
-      "Creating the bet...",
-      title,
-      description,
-      options,
-      endTime,
-      decimalOdds,
-      categories,
-      subCategories
-    );
+
     createBet(
       wallet,
       title,
@@ -82,7 +73,7 @@ const BetModal = ({ isOpen, onClose }: any) => {
       signer,
       { gasPrice: GasPrice.fromString("0.0053untrn") }
     );
-    console.log("inside createBet", client);
+    // console.log("inside createBet", client);
 
     const msg = {
       create_event: {
@@ -104,7 +95,7 @@ const BetModal = ({ isOpen, onClose }: any) => {
       "auto"
     );
 
-    console.log("Bet created:", result);
+    // console.log("Bet created:", result);
   };
   return (
     <Modal isOpen={isOpen} onClose={onClose}>

@@ -10,7 +10,7 @@ import { useSubCategory } from "./SubCategoryContext";
 
 const BodyComponent = ({ onSelectMatch, onSelectOption }: any) => {
   const { selectedSubCategory, setSelectedSubCategory } = useSubCategory();
-  const [selectedCategory, setSelectedCategory] = useState("cricket");
+  const [selectedCategory, setSelectedCategory] = useState("sports");
   const [matches, setMatches] = useState<any>({});
   const router = useRouter();
 
@@ -33,12 +33,12 @@ const BodyComponent = ({ onSelectMatch, onSelectOption }: any) => {
         "neutron1gh09zucan3z7pcrltyjhkpxmwz9ns2x2prackmds9e4kd2v08uhqmh365j",
         query
       );
-      // console.log(result);
+      // console.log("result", result, "selectedCategory", selectedCategory);
       const transformedMatches = transformEventsToMatches(
         result,
         selectedCategory
       );
-      console.log(transformedMatches);
+      // console.log(transformedMatches);
       setMatches(transformedMatches);
     } catch (err) {
       console.log(err);
@@ -46,7 +46,7 @@ const BodyComponent = ({ onSelectMatch, onSelectOption }: any) => {
   };
 
   const handleMatchClick = async (match: any) => {
-    console.log("clicked");
+    // console.log("clicked");
     try {
       const anyWindow = window as any;
       if (!anyWindow.getOfflineSignerAuto) {
@@ -65,7 +65,7 @@ const BodyComponent = ({ onSelectMatch, onSelectOption }: any) => {
         "neutron1gh09zucan3z7pcrltyjhkpxmwz9ns2x2prackmds9e4kd2v08uhqmh365j",
         query
       );
-      console.log(result);
+      // console.log(result);
       onSelectMatch(result);
       onSelectOption(null);
     } catch (err) {
@@ -92,7 +92,7 @@ const BodyComponent = ({ onSelectMatch, onSelectOption }: any) => {
         "neutron1gh09zucan3z7pcrltyjhkpxmwz9ns2x2prackmds9e4kd2v08uhqmh365j",
         query
       );
-      console.log(result);
+      // console.log(result);
       // setBet(result);
       // setError(null);
     } catch (err) {
@@ -103,15 +103,19 @@ const BodyComponent = ({ onSelectMatch, onSelectOption }: any) => {
   };
 
   const transformEventsToMatches = (events: any, category: string) => {
-    console.log("events raw", events);
     return events
-      .filter(
-        (event: any) =>
+      .filter((event: any) => {
+        // console.log("Event category:", event.categories[0], category); // Log event category
+        // console.log("Event resolved status:", event.resolved); // Log resolved status
+
+        // Check filter conditions
+        return (
           event.categories[0].toLowerCase() === category.toLowerCase() &&
-          event.resolved == false
-      )
+          event.resolved === false
+        );
+      })
       .reduce((acc: any, event: any) => {
-        console.log(event);
+        // console.log("Filtered event:", event); // Log events that pass the filter
         const subCategory = event.sub_categories[0].toLowerCase();
         if (!acc[subCategory]) {
           acc[subCategory] = [];
@@ -131,7 +135,8 @@ const BodyComponent = ({ onSelectMatch, onSelectOption }: any) => {
   useEffect(() => {
     const path = router.pathname.substring(1); // Remove leading slash
     setSelectedCategory(path);
-  }, [router.pathname]);
+    fetchEvents();
+  }, []);
 
   return (
     <Box p={4} bg={"#181A24"}>
@@ -174,7 +179,7 @@ const BodyComponent = ({ onSelectMatch, onSelectOption }: any) => {
           )
         )}
       </Flex>
-      <Button onClick={fetchEvents}>Query Events</Button>
+      {/* <Button onClick={fetchEvents}>Query Events</Button> */}
     </Box>
   );
 };
