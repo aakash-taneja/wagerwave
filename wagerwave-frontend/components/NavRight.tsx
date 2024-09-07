@@ -2,7 +2,17 @@ import {
   Box,
   Button,
   Flex,
+  FormControl,
+  FormLabel,
   Input,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  Select,
   Tag,
   TagLabel,
   Text,
@@ -12,15 +22,21 @@ import {
 import { SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import { Coin, GasPrice, StdFee } from "@cosmjs/stargate";
 import { useChain } from "@cosmos-kit/react";
+
 import { useEffect, useState } from "react";
 
 const NavRight = ({ match, option, onSelectOption }: any) => {
   const [amount, setAmount] = useState("");
   const [isCreator, setIsCreator] = useState<boolean>(false);
   const [bets, setBets] = useState<any[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedWinner, setSelectedWinner] = useState("");
+  const handleOpenModal = () => setIsModalOpen(true);
+  const handleCloseModal = () => setIsModalOpen(false);
 
   useEffect(() => {
     if (match) {
+      console.log("match from navright", match);
       setIsCreator(false);
 
       const checkCreator = async () => {
@@ -124,6 +140,7 @@ const NavRight = ({ match, option, onSelectOption }: any) => {
     );
 
     console.log("winner created:", result);
+    handleCloseModal();
   };
 
   const fetchBet = async () => {
@@ -216,7 +233,7 @@ const NavRight = ({ match, option, onSelectOption }: any) => {
               width="full"
               mt={4}
               onClick={() => {
-                handleResolveEvent(match.id, "india");
+                handleOpenModal();
               }}
             >
               Resolve Event
@@ -225,32 +242,79 @@ const NavRight = ({ match, option, onSelectOption }: any) => {
           {/* <MyBets /> */}
         </Box>
       )}
-      <Box
-        bg="#181A24"
-        p={6}
-        borderRadius="md"
-        border={"1px solid white"}
-        color="white"
-        flex={1}
-        mt={4}
-        mr={4}
-      >
-        <Text fontSize="2xl" mb={4}>
-          All Bets
-        </Text>
-        <Flex direction="column" gap={4}>
-          {bets.map((bet, index) => (
-            <Box key={index} p={4} bg="#2E3035" borderRadius="md">
-              <Text>Bet ID: {bet.event_id}</Text>
-              <Text>Amount: {bet.amount.amount}</Text>
-              <Text>
-                User: {bet.user.substring(0, 4)}...{bet.user.substring(42)}
+      {match && (
+        <Box
+          bg="#181A24"
+          p={6}
+          borderRadius="md"
+          border={"1px solid white"}
+          color="white"
+          flex={1}
+          mt={4}
+          mr={4}
+        >
+          {bets.length > 0 ? (
+            <>
+              <Text fontSize="2xl" mb={4}>
+                All Bets
               </Text>
-              <Text>Option: {bet.option}</Text>
-            </Box>
-          ))}
-        </Flex>
-      </Box>
+              <Flex direction="column" gap={4}>
+                {bets.map((bet, index) => (
+                  <Box key={index} p={4} bg="#2E3035" borderRadius="md">
+                    <Text>Bet ID: {bet.event_id}</Text>
+                    <Text>Amount: {bet.amount.amount}</Text>
+                    <Text>
+                      User: {bet.user.substring(0, 4)}...
+                      {bet.user.substring(42)}
+                    </Text>
+                    <Text>Option: {bet.option}</Text>
+                  </Box>
+                ))}
+              </Flex>
+            </>
+          ) : (
+            <>
+              <Text fontSize="2xl" mb={4}>
+                All Bets
+              </Text>
+              <Text>No bets yet ....</Text>
+            </>
+          )}
+        </Box>
+      )}
+      <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Select Winner</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <FormControl>
+              <FormLabel>Winner</FormLabel>
+              <Select
+                placeholder="Select winner"
+                onChange={(e: any) => setSelectedWinner(e.target.value)}
+              >
+                <option value={match?.options[0]}>{match?.options[0]}</option>
+                <option value={match?.options[1]}>{match?.options[1]}</option>
+                {/* Add more options as needed */}
+              </Select>
+            </FormControl>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button
+              colorScheme="teal"
+              mr={3}
+              onClick={() => handleResolveEvent(match.id, selectedWinner)}
+            >
+              Resolve Event
+            </Button>
+            <Button variant="ghost" onClick={handleCloseModal}>
+              Cancel
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </>
   );
 };

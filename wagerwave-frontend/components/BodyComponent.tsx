@@ -6,9 +6,10 @@ import { SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import { GasPrice } from "@cosmjs/stargate";
 import MatchCard from "./MatchCard";
 import { useRouter } from "next/router";
+import { useSubCategory } from "./SubCategoryContext";
 
 const BodyComponent = ({ onSelectMatch, onSelectOption }: any) => {
-  const [selectedSubCategory, setSelectedSubCategory] = useState("cricket");
+  const { selectedSubCategory, setSelectedSubCategory } = useSubCategory();
   const [selectedCategory, setSelectedCategory] = useState("cricket");
   const [matches, setMatches] = useState<any>({});
   const router = useRouter();
@@ -102,10 +103,12 @@ const BodyComponent = ({ onSelectMatch, onSelectOption }: any) => {
   };
 
   const transformEventsToMatches = (events: any, category: string) => {
+    console.log("events raw", events);
     return events
       .filter(
         (event: any) =>
-          event.categories[0].toLowerCase() === category.toLowerCase()
+          event.categories[0].toLowerCase() === category.toLowerCase() &&
+          event.resolved == false
       )
       .reduce((acc: any, event: any) => {
         console.log(event);
@@ -119,6 +122,7 @@ const BodyComponent = ({ onSelectMatch, onSelectOption }: any) => {
           team1: { name: event.options[0], logo: "team1.svg" }, // Adjust as needed
           team2: { name: event.options[1], logo: "team2.svg" }, // Adjust as needed
           odds: { team1: event.odds[0], team2: event.odds[1] }, // Adjust as needed
+          resolved: event.resolved,
         });
         return acc;
       }, {});
@@ -127,7 +131,6 @@ const BodyComponent = ({ onSelectMatch, onSelectOption }: any) => {
   useEffect(() => {
     const path = router.pathname.substring(1); // Remove leading slash
     setSelectedCategory(path);
-    fetchEvents();
   }, [router.pathname]);
 
   return (
@@ -157,7 +160,7 @@ const BodyComponent = ({ onSelectMatch, onSelectOption }: any) => {
         />
       </Grid>
 
-      <Popular onSelectCategory={setSelectedSubCategory} />
+      <Popular />
       <Flex flexWrap={"wrap"} justifyContent={"space-between"}>
         {matches[selectedSubCategory.toLocaleLowerCase()]?.map(
           (match: any, index: any) => (
@@ -172,7 +175,6 @@ const BodyComponent = ({ onSelectMatch, onSelectOption }: any) => {
         )}
       </Flex>
       <Button onClick={fetchEvents}>Query Events</Button>
-      <Button onClick={fetchBet}>Query bets</Button>
     </Box>
   );
 };

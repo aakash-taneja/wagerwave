@@ -29,10 +29,13 @@ import { SiCounterstrike } from "react-icons/si";
 import { GiCricketBat } from "react-icons/gi";
 import { MdSportsSoccer } from "react-icons/md";
 import { useRouter } from "next/router";
+import { useSubCategory } from "./SubCategoryContext";
 
-const Popular = ({ onSelectCategory }: any) => {
+const Popular = () => {
   const router = useRouter();
   const path = router.pathname.substring(1);
+  const { setSelectedSubCategory, selectedSubCategory } = useSubCategory();
+
   const categoriesMapping: any = {
     sports: [
       { name: "Cricket", icon: GiCricketBat },
@@ -43,7 +46,7 @@ const Popular = ({ onSelectCategory }: any) => {
       { name: "Volleyball", icon: FaVolleyballBall },
     ],
     politics: [
-      { name: "US Elections", icon: FaFlagUsa },
+      { name: "US Election", icon: FaFlagUsa },
       { name: "Debate", icon: FaHandshake },
       { name: "Ukraine", icon: FaGlobe },
     ],
@@ -65,14 +68,13 @@ const Popular = ({ onSelectCategory }: any) => {
   };
 
   const categories = categoriesMapping[path] || categoriesMapping["sports"];
-  const [selectedCategory, setSelectedCategory] = useState(categories[0].name);
 
-  const handleCategoryClick = (category: any) => {
-    setSelectedCategory(category.name);
-    onSelectCategory(category.name);
+  const handleSubCategoryClick = (subCategory: any) => {
+    setSelectedSubCategory(subCategory.name);
   };
+
   useEffect(() => {
-    setSelectedCategory(categories[0].name);
+    setSelectedSubCategory(categories[0].name);
   }, [path]);
 
   return (
@@ -85,12 +87,14 @@ const Popular = ({ onSelectCategory }: any) => {
           <WrapItem key={category.name}>
             <Tag
               size="lg"
-              variant={selectedCategory === category.name ? "solid" : "outline"}
+              variant={
+                selectedSubCategory === category.name ? "solid" : "outline"
+              }
               colorScheme={
-                selectedCategory === category.name ? "green" : "teal"
+                selectedSubCategory === category.name ? "green" : "teal"
               }
               cursor="pointer"
-              onClick={() => handleCategoryClick(category)}
+              onClick={() => handleSubCategoryClick(category)}
             >
               <Icon as={category.icon} mr={2} />
               <TagLabel>{category.name}</TagLabel>
