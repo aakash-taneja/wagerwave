@@ -14,7 +14,7 @@ const BodyComponent = ({ onSelectMatch, onSelectOption }: any) => {
   const [matches, setMatches] = useState<any>({});
   const router = useRouter();
 
-  const fetchEvents = async () => {
+  const fetchEvents = async (category: any) => {
     try {
       const anyWindow = window as any;
       if (!anyWindow.getOfflineSignerAuto) {
@@ -33,11 +33,8 @@ const BodyComponent = ({ onSelectMatch, onSelectOption }: any) => {
         "neutron1gh09zucan3z7pcrltyjhkpxmwz9ns2x2prackmds9e4kd2v08uhqmh365j",
         query
       );
-      // console.log("result", result, "selectedCategory", selectedCategory);
-      const transformedMatches = transformEventsToMatches(
-        result,
-        selectedCategory
-      );
+      console.log("result", result, "selectedCategory", category);
+      const transformedMatches = transformEventsToMatches(result, category);
       // console.log(transformedMatches);
       setMatches(transformedMatches);
     } catch (err) {
@@ -134,9 +131,10 @@ const BodyComponent = ({ onSelectMatch, onSelectOption }: any) => {
 
   useEffect(() => {
     const path = router.pathname.substring(1); // Remove leading slash
+    console.log(path);
     setSelectedCategory(path);
-    fetchEvents();
-  }, []);
+    fetchEvents(path);
+  }, [router.pathname]);
 
   return (
     <Box p={4} bg={"#181A24"}>
